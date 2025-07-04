@@ -11,6 +11,11 @@ public class NotifyWorker(ILogger<NotifyWorker> logger, IOccCmdRunnerFactory occ
     private const string NextcloudContainerName = "nextcloud";
     private const int PeriodInMinutes = 1;
 
+    private static readonly string[] mountAllowFilter =
+    [
+        "password::password"
+    ];
+
     private readonly IOccCmdRunner _cmdRunner = occCmdRunnerFactory.Create(NextcloudContainerName);
 
     private ICollection<IMountListener> _mountListeners = new List<IMountListener>();
@@ -30,7 +35,7 @@ public class NotifyWorker(ILogger<NotifyWorker> logger, IOccCmdRunnerFactory occ
                 _ = mounts ?? throw new InvalidOperationException(noMountsMsg);
 
                 var tasks = new List<Task>();
-                foreach (var mount in mounts)
+                foreach (var mount in mounts.Where(m => mountAllowFilter.Contains(m.AuthenticationType)))
                 {
                     if (_mountListeners.Any(m => m.Id == mount.MountId))
                     {
