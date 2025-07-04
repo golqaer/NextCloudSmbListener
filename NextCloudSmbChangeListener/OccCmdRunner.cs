@@ -23,24 +23,24 @@ public class OccCmdRunner(string dockerContainer, ILogger<OccCmdRunner> logger) 
     public async Task<BufferedCommandResult?> RunOccCommandAsync(string cmd, string occArgs,
         CancellationToken cancellationToken = default)
     {
+        string fullCmd = $"exec -u {User} {dockerContainer} php occ {cmd} {occArgs}";
+
         try
         {
-            logger.LogInformation("Выполняется команда: occ {cmd} {OccArgs}", cmd, occArgs);
+            logger.LogInformation("Выполняется команда: {cmd}", fullCmd);
 
             var result = await Cli.Wrap(Wrap)
                 .WithArguments($"exec -u {User} {dockerContainer} php occ {cmd} {occArgs}")
                 .WithValidation(CommandResultValidation.None) // не кидай исключения при ненулевом exit code
                 .ExecuteBufferedAsync(cancellationToken);
 
-            logger.LogInformation("Выходной код: {ExitCode}", result.ExitCode);
-            logger.LogDebug("STDOUT: {Stdout}", result.StandardOutput.Trim());
-            logger.LogDebug("STDERR: {Stderr}", result.StandardError.Trim());
+            logger.LogInformation("Команда {Cmd}.\r\nВыходной код: {ExitCode}.\r\nSTDOUT: {Stdout}.\r\nSTDERR: {Stderr}", fullCmd, result.ExitCode, result.StandardOutput.Trim(), result.StandardError.Trim());
 
             return result;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Ошибка при выполнении команды OCC: {Cmd} {OccArgs}", cmd, occArgs);
+            logger.LogError(ex, "Ошибка при выполнении команды OCC: {Cmd}", fullCmd);
             return null;
         }
     }

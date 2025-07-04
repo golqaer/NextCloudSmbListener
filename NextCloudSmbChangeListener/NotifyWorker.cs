@@ -19,7 +19,6 @@ public class NotifyWorker(ILogger<NotifyWorker> logger, IOccCmdRunnerFactory occ
     {
         const string noMountsMsg = "Не удалось получить список монтирований.";
 
-
         while (!ct.IsCancellationRequested)
         {
             try
@@ -46,6 +45,10 @@ public class NotifyWorker(ILogger<NotifyWorker> logger, IOccCmdRunnerFactory occ
                 }
 
                 await Task.Delay(TimeSpan.FromMinutes(PeriodInMinutes), ct);
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                break;
             }
             catch (Exception ex)
             {
