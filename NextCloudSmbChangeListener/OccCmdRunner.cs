@@ -1,17 +1,36 @@
-﻿using CliWrap;
+using CliWrap;
 using CliWrap.Buffered;
 using Microsoft.Extensions.Logging;
 
 namespace NextCloudSmbChangeListener;
 
+/// <summary>
+/// Предоставляет методы для выполнения OCC-команд в контейнере Docker.
+/// </summary>
 public interface IOccCmdRunner
 {
+    /// <summary>
+    /// Выполняет OCC-команду и возвращает необработанный результат.
+    /// </summary>
+    /// <param name="cmd">Имя команды.</param>
+    /// <param name="cancellationToken">Токен отмены.</param>
+    /// <param name="args">Дополнительные аргументы.</param>
     Task<BufferedCommandResult?> RunOccCommandAsync(string cmd,
         CancellationToken cancellationToken = default, params string[] args);
 
+    /// <summary>
+    /// Выполняет OCC-команду и ожидает вывод в формате JSON.
+    /// </summary>
+    /// <param name="cmd">Имя команды.</param>
+    /// <param name="cancellationToken">Токен отмены.</param>
+    /// <param name="args">Дополнительные аргументы.</param>
+    /// <returns>JSON-строка или null в случае ошибки.</returns>
     Task<string?> RunAndGetJsonAsync(string cmd, CancellationToken cancellationToken = default, params string[] args);
 }
 
+/// <summary>
+/// Исполняет OCC-команды внутри Docker-контейнера с помощью CliWrap.
+/// </summary>
 public class OccCmdRunner(string dockerContainer, ILogger<OccCmdRunner> logger) : IOccCmdRunner
 {
     private const string
@@ -19,6 +38,7 @@ public class OccCmdRunner(string dockerContainer, ILogger<OccCmdRunner> logger) 
         , User = "0"
         ;
 
+    /// <inheritdoc />
     public async Task<BufferedCommandResult?> RunOccCommandAsync(string cmd,
         CancellationToken cancellationToken = default, params string[] args)
     {
@@ -45,6 +65,7 @@ public class OccCmdRunner(string dockerContainer, ILogger<OccCmdRunner> logger) 
         }
     }
 
+    /// <inheritdoc />
     public async Task<string?> RunAndGetJsonAsync(string cmd, CancellationToken cancellationToken = default, params string[] args)
     {
         const string 
@@ -56,6 +77,9 @@ public class OccCmdRunner(string dockerContainer, ILogger<OccCmdRunner> logger) 
     }
 
     // ReSharper disable once MemberCanBeMadeStatic.Local
+    /// <summary>
+    /// Формирует аргументы командной строки в формате OCC.
+    /// </summary>
     private string BuildArgs(params string[] args)
     {
         const string

@@ -1,16 +1,22 @@
-﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using NextCloudSmbChangeListener.Factories;
 
 namespace NextCloudSmbChangeListener;
 
+/// <summary>
+/// Фоновая служба, которая опрашивает Nextcloud на наличие SMB‑подключений и запускает слушателей.
+/// </summary>
 public class NotifyWorker(ILogger<NotifyWorker> logger, IOccCmdRunnerFactory occCmdRunnerFactory, IMountListenerFactory mountListenerFactory)
     : BackgroundService
 {
     private const string NextcloudContainerName = "nextcloud";
     private const int PeriodInMinutes = 1;
 
+    /// <summary>
+    /// Допустимые типы аутентификации, для которых запускаются слушатели.
+    /// </summary>
     private static readonly string[] mountAllowFilter =
     [
         "password::password"
@@ -20,6 +26,10 @@ public class NotifyWorker(ILogger<NotifyWorker> logger, IOccCmdRunnerFactory occ
 
     private ICollection<IMountListener> _mountListeners = new List<IMountListener>();
 
+    /// <summary>
+    /// Периодически проверяет подключения и запускает слушателей для разрешённых типов.
+    /// </summary>
+    /// <param name="ct">Токен отмены.</param>
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
         const string noMountsMsg = "Не удалось получить список монтирований.";
@@ -65,6 +75,9 @@ public class NotifyWorker(ILogger<NotifyWorker> logger, IOccCmdRunnerFactory occ
         await Task.WhenAll(_mountListeners.Select(x => x.Task)!);
     }
 
+    /// <summary>
+    /// Обрабатывает завершение работы слушателя подключения.
+    /// </summary>
     private void OnCompleteMountListener(object? sender, EventArgs e)
     {
         if (sender is IMountListener listener)

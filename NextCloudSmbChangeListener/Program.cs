@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NextCloudSmbChangeListener.Factories;
@@ -8,8 +8,15 @@ using System.Runtime.InteropServices;
 
 namespace NextCloudSmbChangeListener
 {
+    /// <summary>
+    /// Точка входа приложения.
+    /// </summary>
     internal class Program
     {
+        /// <summary>
+        /// Главный метод программы.
+        /// </summary>
+        /// <param name="args">Аргументы командной строки.</param>
         static async Task Main(string[] args)
         {
             var isService = !(Debugger.IsAttached || args.Contains("--console"));
@@ -51,6 +58,10 @@ namespace NextCloudSmbChangeListener
 
             await host.RunAsync();
         }
+        /// <summary>
+        /// Обеспечивает корректное завершение при работе в консольном режиме.
+        /// </summary>
+        /// <param name="lifetime">Служба управления временем жизни приложения.</param>
         private static void RegisterConsoleShutdown(IHostApplicationLifetime lifetime)
         {
             Console.CancelKeyPress += (sender, e) =>
@@ -61,3 +72,4 @@ namespace NextCloudSmbChangeListener
         }
     }
 }
+
