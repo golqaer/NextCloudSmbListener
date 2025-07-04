@@ -6,11 +6,10 @@ namespace NextCloudSmbChangeListener;
 
 public interface IOccCmdRunner
 {
-    Task<BufferedCommandResult?> RunOccCommandAsync(string cmd, string occArgs,
-        CancellationToken cancellationToken = default);
+    Task<BufferedCommandResult?> RunOccCommandAsync(string cmd,
+        CancellationToken cancellationToken = default, params string[] args);
 
     Task<string?> RunAndGetJsonAsync(string cmd, CancellationToken cancellationToken = default, params string[] args);
-    string BuildArgs(params string[] args);
 }
 
 public class OccCmdRunner(string dockerContainer, ILogger<OccCmdRunner> logger) : IOccCmdRunner
@@ -20,9 +19,10 @@ public class OccCmdRunner(string dockerContainer, ILogger<OccCmdRunner> logger) 
         , User = "0"
         ;
 
-    public async Task<BufferedCommandResult?> RunOccCommandAsync(string cmd, string occArgs,
-        CancellationToken cancellationToken = default)
+    public async Task<BufferedCommandResult?> RunOccCommandAsync(string cmd,
+        CancellationToken cancellationToken = default, params string[] args)
     {
+        string occArgs = BuildArgs(args);
         string fullCmd = $"exec -u {User} {dockerContainer} php occ {cmd} {occArgs}";
 
         try
@@ -50,14 +50,13 @@ public class OccCmdRunner(string dockerContainer, ILogger<OccCmdRunner> logger) 
         const string 
               requiredArg = "output=json"
             ;
-        var occArgs = BuildArgs(args.Union([requiredArg]).ToArray());
 
-        var result = await RunOccCommandAsync(cmd, occArgs, cancellationToken);
+        var result = await RunOccCommandAsync(cmd, cancellationToken, args.Union([requiredArg]).ToArray());
         return result is not { ExitCode: 0 } ? null : result.StandardOutput;
     }
 
     // ReSharper disable once MemberCanBeMadeStatic.Local
-    public string BuildArgs(params string[] args)
+    private string BuildArgs(params string[] args)
     {
         const string
             argPrefix = "--"

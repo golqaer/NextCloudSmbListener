@@ -29,7 +29,7 @@ public class MountListener(int mountId, string nextcloudContainerName, IOccCmdRu
 
         try
         {
-            Task = _cmdRunner.RunAndGetJsonAsync($"files_external:notify {Id}", ct);
+            Task = _cmdRunner.RunAndGetJsonAsync($"files_external:notify {Id}", ct, "no-self-check");
             await Task;
         }
         catch (Exception ex)

@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
-using Serilog;
 using NextCloudSmbChangeListener.Factories;
+using Serilog;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace NextCloudSmbChangeListener
 {
@@ -54,8 +55,8 @@ namespace NextCloudSmbChangeListener
         {
             Console.CancelKeyPress += (sender, e) =>
             {
-                e.Cancel = true;               // предотвращаем мгновенное завершение
-                lifetime.StopApplication();    // инициируем graceful–shutdown
+                e.Cancel = true;
+                lifetime.StopApplication(); 
             };
         }
     }

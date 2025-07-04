@@ -58,6 +58,7 @@ public class NotifyWorker(ILogger<NotifyWorker> logger, IOccCmdRunnerFactory occ
             catch (Exception ex)
             {
                 logger.LogError(ex.ToString());
+                await Task.Delay(TimeSpan.FromMinutes(PeriodInMinutes), ct);
             }
         }
 
