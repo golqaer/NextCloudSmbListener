@@ -9,7 +9,7 @@ namespace NextCloudSmbChangeListener
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var isService = !(Debugger.IsAttached || args.Contains("--console"));
 
@@ -44,7 +44,19 @@ namespace NextCloudSmbChangeListener
                 builder.UseConsoleLifetime();
             }
 
-            builder.Build().Run();
+            using var host = builder.Build();
+
+            RegisterConsoleShutdown(host.Services.GetRequiredService<IHostApplicationLifetime>());
+
+            await host.RunAsync();
+        }
+        private static void RegisterConsoleShutdown(IHostApplicationLifetime lifetime)
+        {
+            Console.CancelKeyPress += (sender, e) =>
+            {
+                e.Cancel = true;               // предотвращаем мгновенное завершение
+                lifetime.StopApplication();    // инициируем graceful–shutdown
+            };
         }
     }
 }
