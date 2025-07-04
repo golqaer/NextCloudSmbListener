@@ -10,7 +10,7 @@ public interface IOccCmdRunnerFactory
     /// <summary>
     /// Создаёт исполнителя OCC-команд для указанного контейнера.
     /// </summary>
-    OccCmdRunner Create(string dockerContainer);
+    IOccCmdRunner Create(string dockerContainer);
 }
 
 /// <summary>
@@ -18,6 +18,6 @@ public interface IOccCmdRunnerFactory
 /// </summary>
 public class OccCmdRunnerFactory(ILogger<OccCmdRunner> logger) : IOccCmdRunnerFactory
 {
-    public OccCmdRunner Create(string dockerContainer)
-        => new (dockerContainer, logger);
+    public IOccCmdRunner Create(string dockerContainer)
+        => new OccCmdRunner(dockerContainer, logger);
 }
